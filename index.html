@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImpactDash - NGO Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body id="top-dashboard" class="bg-[#f8fafc] text-slate-800 font-sans h-screen flex overflow-hidden">
+
+<!-- Desktop Sidebar -->
+<aside class="w-72 bg-[#0f172a] text-slate-300 flex flex-col justify-between hidden lg:flex shrink-0 z-20">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center font-black text-white">I</div>
+<h1 class="text-xl font-bold text-white tracking-tight">ImpactDash</h1>
+</div>
+
+<nav class="space-y-1">
+<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-3">Navigation</p>
+<button id="nav-desktop-dashboard" onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 bg-slate-800/60 text-white font-medium rounded-xl border-l-4 border-blue-500 transition-all">
+<span>📊</span> Dashboard Overview
+</button>
+<button id="nav-desktop-reports" onclick="switchTab('reports')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-800/40 hover:text-white rounded-xl text-slate-400 border-l-4 border-transparent transition-all mt-1">
+<span>📄</span> Reports & Audits
+</button>
+<button id="nav-desktop-volunteers" onclick="switchTab('volunteers')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-800/40 hover:text-white rounded-xl text-slate-400 border-l-4 border-transparent transition-all mt-1">
+<span>👥</span> Volunteers Hub
+</button>
+<button id="nav-desktop-settings" onclick="switchTab('settings')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-800/40 hover:text-white rounded-xl text-slate-400 border-l-4 border-transparent transition-all mt-1">
+<span>⚙️</span> Portal Settings
+</button>
+</nav>
+
+<div id="filter-section" class="mt-8 pt-6 border-t border-slate-800 space-y-4">
+<div>
+<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-1">1. Select Indian State</label>
+<select id="state-select-desktop" onchange="syncFilters(this.value, 'state')" class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl focus:ring-2 focus:ring-blue-500 block p-3 font-medium outline-none cursor-pointer transition-all">
+<option value="national">🇮🇳 National Overview</option>
+<option value="maharashtra">Maharashtra</option>
+<option value="delhi">Delhi NCR</option>
+<option value="karnataka">Karnataka</option>
+<option value="other_states">Explore Other States...</option>
+</select>
+</div>
+<div>
+<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-1">2. Financial Year</label>
+<select id="year-select-desktop" onchange="syncFilters(this.value, 'year')" class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl focus:ring-2 focus:ring-blue-500 block p-3 font-medium outline-none cursor-pointer transition-all">
+<option value="2025">FY 2024-2025 (Latest)</option>
+<option value="2024">FY 2023-2024</option>
+<option value="2023">FY 2022-2023</option>
+</select>
+</div>
+</div>
+</div>
+
+<div class="p-4 border-t border-slate-800 flex items-center gap-3 bg-slate-950/40">
+<div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-sm shadow-md">DV</div>
+<div>
+<p class="text-xs font-bold text-white">Devyansh</p>
+<p class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Internship Auditor</p>
+</div>
+</div>
+</aside>
+
+<main class="flex-1 flex flex-col h-full overflow-y-auto relative pb-20 lg:pb-0">
+<div class="p-4 lg:p-8 max-w-[1400px] w-full mx-auto space-y-6">
+
+<!-- PAGE 1: DASHBOARD -->
+<div id="page-dashboard" class="page-view block space-y-6">
+
+<header class="flex flex-col gap-4 border-b border-slate-200 pb-5">
+<div>
+<h2 id="dashboard-title" class="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">India Region Overview 🇮🇳</h2>
+<p class="text-sm text-slate-500 mt-1 font-medium">Tracking verified CSR and Govt funding metrics.</p>
+</div>
+
+<div class="flex lg:hidden gap-2 w-full">
+<select id="state-select-mobile" onchange="syncFilters(this.value, 'state')" class="flex-1 bg-white border border-slate-200 text-slate-700 text-xs rounded-xl p-2.5 font-bold outline-none shadow-sm">
+<option value="national">🇮🇳 National</option>
+<option value="maharashtra">Maharashtra</option>
+<option value="delhi">Delhi NCR</option>
+<option value="karnataka">Karnataka</option>
+<option value="other_states">Other States...</option>
+</select>
+<select id="year-select-mobile" onchange="syncFilters(this.value, 'year')" class="flex-1 bg-white border border-slate-200 text-slate-700 text-xs rounded-xl p-2.5 font-bold outline-none shadow-sm">
+<option value="2025">FY 2024-25</option>
+<option value="2024">FY 2023-24</option>
+<option value="2023">FY 2022-23</option>
+</select>
+</div>
+</header>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-start">
+<div>
+<h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Funds Raised</h3>
+<p id="kpi-funds" class="text-2xl font-black text-slate-900 mt-2">₹25,400 Cr</p>
+</div>
+<div class="p-3 bg-emerald-50 rounded-xl text-emerald-600 text-lg">💰</div>
+</div>
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-start">
+<div>
+<h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Lives Impacted</h3>
+<p id="kpi-impact" class="text-2xl font-black text-slate-900 mt-2">12.5M</p>
+</div>
+<div class="p-3 bg-blue-50 rounded-xl text-blue-600 text-lg">👥</div>
+</div>
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Project Status</h3>
+<div class="p-2 bg-orange-50 rounded-xl text-orange-600 text-sm">📁</div>
+</div>
+<div class="flex gap-4">
+<div>
+<p id="kpi-ongoing" class="text-xl font-black text-orange-500">1,240</p>
+<p class="text-[10px] font-bold text-slate-400 uppercase">Ongoing</p>
+</div>
+<div>
+<p id="kpi-completed" class="text-xl font-black text-emerald-500">850</p>
+<p class="text-[10px] font-bold text-slate-400 uppercase">Completed</p>
+</div>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-start">
+<div>
+<h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active NGOs</h3>
+<p id="kpi-volunteers" class="text-2xl font-black text-slate-900 mt-2">4,820</p>
+</div>
+<div class="p-3 bg-purple-50 rounded-xl text-purple-600 text-lg">🏢</div>
+</div>
+</div>
+
+<div class="bg-white p-4 lg:p-6 rounded-2xl border border-slate-200 shadow-sm">
+<h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Funding Flow</h3>
+<div class="relative h-64 w-full"><canvas id="wideLineChart"></canvas></div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 pb-10">
+<div class="bg-white p-4 lg:p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+<h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Focus Area Distribution</h3>
+<div class="relative h-56 w-full flex justify-center items-center"><canvas id="doughnutSectorChart"></canvas></div>
+</div>
+
+<div class="xl:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+<div class="p-4 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+<h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">NGO Directory</h3>
+<a href="https://ngodarpan.gov.in/index.php/home/statewise" target="_blank" class="text-[10px] bg-white border border-slate-300 px-3 py-1.5 rounded-lg text-slate-700 font-bold hover:bg-slate-100 transition-colors w-full sm:w-auto text-center">
+View Official Darpan ↗
+</a>
+</div>
+<div class="overflow-x-auto overflow-y-auto flex-1">
+<table class="w-full text-left border-collapse min-w-[700px]">
+<thead class="sticky top-0 bg-slate-50 shadow-sm z-10">
+<tr class="text-slate-500 text-[10px] uppercase tracking-widest border-b border-slate-200">
+<th class="py-3 px-4 font-bold">NGO Name</th>
+<th class="py-3 px-4 font-bold">Focus Area</th>
+<th class="py-3 px-4 font-bold">Funds (Cr)</th>
+<th class="py-3 px-4 font-bold text-center">Status</th>
+<th class="py-3 px-4 font-bold text-center">Action</th>
+</tr>
+</thead>
+<tbody id="ngo-table-data" class="text-xs text-slate-700 divide-y divide-slate-100">
+<!-- Injected via JS -->
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PAGE 2: REPORTS & AUDITS -->
+<div id="page-reports" class="page-view hidden space-y-6">
+<header class="border-b border-slate-200 pb-5">
+<h2 class="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Reports & Audits</h2>
+<p class="text-sm text-slate-500 mt-1 font-medium">Download dynamic reports for the active region.</p>
+</header>
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+<div class="p-4 border-b border-slate-100 bg-slate-50"><h3 class="text-sm font-bold text-slate-800 uppercase">Export Tools</h3></div>
+<div class="p-4 grid gap-4">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-slate-200 rounded-xl gap-4">
+<div class="flex items-center gap-4">
+<div class="text-3xl text-emerald-500">📊</div>
+<div><p class="font-bold text-slate-800 text-sm">NGO Master List (CSV)</p><p class="text-[10px] text-slate-500">Generates real Excel file.</p></div>
+</div>
+<button onclick="generateCSVReport()" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700">Download</button>
+</div>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-slate-200 rounded-xl gap-4">
+<div class="flex items-center gap-4">
+<div class="text-3xl text-red-500">📄</div>
+<div><p class="font-bold text-slate-800 text-sm">FCRA Compliance Audit (PDF)</p><p class="text-[10px] text-slate-500">Dynamically generated report.</p></div>
+</div>
+<button onclick="generateFCRAReport()" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700">Download</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PAGE 3: VOLUNTEERS HUB -->
+<div id="page-volunteers" class="page-view hidden space-y-6">
+<header class="border-b border-slate-200 pb-5">
+<h2 class="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Volunteers Hub</h2>
+<p class="text-sm text-slate-500 mt-1 font-medium">Apply for active NGO volunteering drives.</p>
+</header>
+
+<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6">
+<label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Filter State:</label>
+<select id="vol-state-select" onchange="renderVolunteers()" class="p-3 rounded-xl border border-slate-300 w-full bg-slate-50 font-bold outline-none text-sm">
+<option value="all">🇮🇳 All States</option>
+<option value="maharashtra">Maharashtra</option>
+<option value="delhi">Delhi NCR</option>
+<option value="karnataka">Karnataka</option>
+</select>
+</div>
+
+<div id="volunteer-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Injected via JS -->
+</div>
+</div>
+
+<!-- PAGE 4: PORTAL SETTINGS -->
+<div id="page-settings" class="page-view hidden space-y-6">
+<header class="border-b border-slate-200 pb-5">
+<h2 class="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Portal Settings</h2>
+</header>
+<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+<div class="space-y-6">
+<div class="flex items-center justify-between border-b border-slate-100 pb-4">
+<div><p class="font-bold text-slate-800 text-sm">Receive Email Alerts</p></div>
+<input type="checkbox" checked class="w-5 h-5 rounded text-blue-600">
+</div>
+<div class="pt-2"><button onclick="alert('Saved!')" class="w-full px-6 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900">Save</button></div>
+</div>
+</div>
+</div>
+
+</div>
+</main>
+
+<!-- MOBILE BOTTOM NAVIGATION -->
+<nav class="lg:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<button id="nav-mobile-dashboard" onclick="switchTab('dashboard')" class="mobile-nav-btn flex flex-col items-center p-2 text-blue-600 w-full">
+<span class="text-xl">📊</span>
+<span class="text-[9px] font-bold mt-1 uppercase tracking-wider">Dash</span>
+</button>
+<button id="nav-mobile-reports" onclick="switchTab('reports')" class="mobile-nav-btn flex flex-col items-center p-2 text-slate-400 w-full">
+<span class="text-xl">📄</span>
+<span class="text-[9px] font-bold mt-1 uppercase tracking-wider">Reports</span>
+</button>
+<button id="nav-mobile-volunteers" onclick="switchTab('volunteers')" class="mobile-nav-btn flex flex-col items-center p-2 text-slate-400 w-full">
+<span class="text-xl">👥</span>
+<span class="text-[9px] font-bold mt-1 uppercase tracking-wider">Hub</span>
+</button>
+<button id="nav-mobile-settings" onclick="switchTab('settings')" class="mobile-nav-btn flex flex-col items-center p-2 text-slate-400 w-full">
+<span class="text-xl">⚙️</span>
+<span class="text-[9px] font-bold mt-1 uppercase tracking-wider">Settings</span>
+</button>
+</nav>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+const MY_GOOGLE_FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSeo8TS1hpSwDEcXlkHp5_2W5yshNSfTaQcoHY5ao25mszfUKQ/viewform?usp=publish-editor";
+
+const stateDatabase = {
+national: {
+title: "India Region Overview 🇮🇳",
+baseFunds: 28540, ongoing: 14500, completed: 8200, activeNGOs: 168400,
+lineLabels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+lineReceived: [1800, 2100, 4500, 1500, 1900, 2200, 2400, 2800, 3100, 3500, 4200, 5000],
+pieLabels: ['Education', 'Healthcare', 'Environment', 'Rural Dev.'], pieData: [38, 30, 12, 20],
+table: [
+{ name: "Pratham Education", focus: "Education", funds: 450, status: "Verified", link: "https://ngodarpan.gov.in" },
+{ name: "Akshaya Patra", focus: "Food", funds: 380, status: "Verified", link: "https://ngodarpan.gov.in" },
+{ name: "Smile Foundation", focus: "Healthcare", funds: 210, status: "Verified", link: "https://ngodarpan.gov.in" }
+]
+},
+maharashtra: {
+title: "Maharashtra NGO Directory",
+baseFunds: 4850, ongoing: 2100, completed: 1500, activeNGOs: 22400,
+lineLabels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'], lineReceived: [300, 800, 350, 400, 500, 750],
+pieLabels: ['Education', 'Healthcare', 'Water/Sanitation', 'Rural Dev.'], pieData: [30, 25, 25, 20],
+table: [
+{ name: "Tata Trusts", focus: "Healthcare/Water", funds: 520, status: "Verified", link: "https://ngodarpan.gov.in" },
+{ name: "Snehalaya", focus: "Women Emp.", funds: 45, status: "Verified", link: "https://ngodarpan.gov.in" }
+]
+},
+delhi: {
+title: "Delhi NCR NGO Directory",
+baseFunds: 3200, ongoing: 1400, completed: 850, activeNGOs: 18500,
+lineLabels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'], lineReceived: [200, 500, 250, 300, 350, 480],
+pieLabels: ['Environment', 'Education', 'Slum Dev.', 'Healthcare'], pieData: [35, 30, 20, 15],
+table: [
+{ name: "Chintan Environmental", focus: "Environment", funds: 32, status: "Verified", link: "https://ngodarpan.gov.in" },
+{ name: "Udayan Care", focus: "Orphan Care", funds: 41, status: "Verified", link: "https://ngodarpan.gov.in" }
+]
+},
+karnataka: {
+title: "Karnataka NGO Directory",
+baseFunds: 3950, ongoing: 1800, completed: 1100, activeNGOs: 19200,
+lineLabels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'], lineReceived: [250, 650, 300, 350, 420, 550],
+pieLabels: ['Tech/Edu', 'Healthcare', 'Environment', 'Rural Dev.'], pieData: [40, 25, 15, 20],
+table: [
+{ name: "Agastya Int.", focus: "Education", funds: 110, status: "Verified", link: "https://ngodarpan.gov.in" },
+{ name: "Karuna Trust", focus: "Healthcare", funds: 75, status: "Verified", link: "https://ngodarpan.gov.in" }
+]
+},
+other_states: {
+title: "Standard State Directory",
+baseFunds: 1200, ongoing: 800, completed: 400, activeNGOs: 6500,
+lineLabels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'], lineReceived: [100, 250, 150, 180, 200, 300],
+pieLabels: ['Education', 'Healthcare', 'Women Emp.', 'Food Dist.'], pieData: [35, 30, 20, 15],
+table: [
+{ name: "State Rural Soc.", focus: "Rural Dev.", funds: 85, status: "Verified", link: "https://ngodarpan.gov.in" }
+]
+}
+};
+
+const volunteerOpps = [
+{ state: "maharashtra", icon: "🏫", title: "Mumbai Slum Literacy", ngo: "Teach for India", sector: "Education", req: "150 Tutors" },
+{ state: "maharashtra", icon: "💧", title: "Drought Relief Digging", ngo: "Pani Foundation", sector: "Rural Dev.", req: "500 Workers" },
+{ state: "delhi", icon: "🌳", title: "Yamuna Cleanup", ngo: "Swechha", sector: "Environment", req: "200 Volunteers" },
+{ state: "karnataka", icon: "💻", title: "Rural Tech Camp", ngo: "Agastya Foundation", sector: "Education", req: "80 Instructors" },
+{ state: "national", icon: "🚨", title: "Disaster Relief Reserve", ngo: "Goonj", sector: "Crisis", req: "10,000 Standby" }
+];
+
+let activeLineChart = null;
+let activePieChart = null;
+
+function switchTab(pageId) {
+document.querySelectorAll('.page-view').forEach(page => page.classList.add('hidden'));
+document.getElementById('page-' + pageId).classList.remove('hidden');
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+btn.classList.remove('bg-slate-800/60', 'text-white', 'border-blue-500');
+btn.classList.add('text-slate-400', 'border-transparent');
+});
+const dBtn = document.getElementById('nav-desktop-' + pageId);
+if(dBtn) { dBtn.classList.remove('text-slate-400', 'border-transparent'); dBtn.classList.add('bg-slate-800/60', 'text-white', 'border-blue-500'); }
+
+document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+btn.classList.remove('text-blue-600');
+btn.classList.add('text-slate-400');
+});
+const mBtn = document.getElementById('nav-mobile-' + pageId);
+if(mBtn) { mBtn.classList.remove('text-slate-400'); mBtn.classList.add('text-blue-600'); }
+
+if(pageId === 'dashboard') {
+document.getElementById('filter-section').classList.remove('hidden');
+updateDashboard();
+} else {
+document.getElementById('filter-section').classList.add('hidden');
+}
+}
+
+function syncFilters(value, type) {
+if (type === 'state') {
+document.getElementById('state-select-desktop').value = value;
+document.getElementById('state-select-mobile').value = value;
+} else {
+document.getElementById('year-select-desktop').value = value;
+document.getElementById('year-select-mobile').value = value;
+}
+updateDashboard();
+}
+
+function generateCSVReport() {
+const chosenState = document.getElementById('state-select-desktop').value;
+const chosenYear = document.getElementById('year-select-desktop').value;
+const data = stateDatabase[chosenState] || stateDatabase.other_states;
+
+let csvContent = "data:text/csv;charset=utf-8,";
+csvContent += `Financial Year:,${chosenYear}\\nRegion:,${data.title}\\n\\n`;
+csvContent += "NGO Name,Focus Area,Funds Received (Cr),Audit Status\\n";
+data.table.forEach(row => { csvContent += `"${row.name}","${row.focus}",${row.funds},"${row.status}"\\n`; });
+
+const link = document.createElement("a");
+link.setAttribute("href", encodeURI(csvContent));
+link.setAttribute("download", `NGO_Audit_${chosenState}_${chosenYear}.csv`);
+document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+function generateFCRAReport() {
+const chosenState = document.getElementById('state-select-desktop').value;
+const chosenYear = document.getElementById('year-select-desktop').value;
+const data = stateDatabase[chosenState] || stateDatabase.other_states;
+
+let report = `GOVERNMENT OF INDIA - FCRA COMPLIANCE REPORT\\n--------------------------------------------------\\n`;
+report += `Financial Year: ${chosenYear}\\nRegion: ${data.title}\\nTimestamp: ${new Date().toLocaleString()}\\n\\n`;
+report += `VERIFIED ENTITIES:\\n`;
+data.table.forEach(row => { report += `- ${row.name} | Sector: ${row.focus} | Status: ${row.status}\\n`; });
+
+const link = document.createElement('a');
+link.setAttribute("href", URL.createObjectURL(new Blob([report], {type: 'text/plain'})));
+link.setAttribute("download", `FCRA_Report_${chosenState}_FY${chosenYear}.txt`);
+document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+function getPreFilledFormLink(ngoName, campaignTitle) {
+return `${MY_GOOGLE_FORM_LINK}&entry_ngo=${encodeURIComponent(ngoName)}&entry_campaign=${encodeURIComponent(campaignTitle)}`;
+}
+
+function renderVolunteers() {
+const selectedState = document.getElementById('vol-state-select').value;
+const grid = document.getElementById('volunteer-grid');
+grid.innerHTML = '';
+let filtered = volunteerOpps.filter(opp => selectedState === 'all' || opp.state === selectedState || opp.state === 'national');
+
+if (filtered.length === 0) {
+grid.innerHTML = `<p class="text-slate-500 text-sm">No local drives found. Please check National list.</p>`;
+return;
+}
+
+filtered.forEach(opp => {
+grid.innerHTML += `
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+<div class="text-4xl mb-3">${opp.icon}</div>
+<h3 class="text-md font-bold text-slate-800">${opp.title}</h3>
+<p class="text-xs font-bold text-blue-600 mt-1">${opp.ngo}</p>
+<p class="text-[10px] text-slate-500 mt-1 mb-4">Req: ${opp.req}</p>
+<a href="${getPreFilledFormLink(opp.ngo, opp.title)}" target="_blank" class="block w-full px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700">Apply Now</a>
+</div>
+`;
+});
+}
+
+function formatNumber(num) { return num.toLocaleString('en-IN'); }
+
+function updateDashboard() {
+const chosenState = document.getElementById('state-select-desktop').value;
+const chosenYear = parseInt(document.getElementById('year-select-desktop').value);
+
+let scaleFactor = 1.0;
+if (chosenYear === 2024) scaleFactor = 0.88;
+if (chosenYear === 2023) scaleFactor = 0.75;
+
+let contextData = stateDatabase[chosenState] || stateDatabase.other_states;
+if (chosenState === 'other_states') contextData.title = "Consolidated Overviews";
+
+document.getElementById('dashboard-title').innerText = contextData.title + " (FY " + chosenYear + ")";
+document.getElementById('kpi-funds').innerText = "₹" + formatNumber(Math.floor(contextData.baseFunds * scaleFactor)) + " Cr";
+document.getElementById('kpi-ongoing').innerText = formatNumber(Math.floor(contextData.ongoing * scaleFactor));
+document.getElementById('kpi-completed').innerText = formatNumber(Math.floor(contextData.completed * scaleFactor));
+document.getElementById('kpi-volunteers').innerText = formatNumber(Math.floor(contextData.activeNGOs * scaleFactor));
+
+const tableGridBody = document.getElementById('ngo-table-data');
+tableGridBody.innerHTML = '';
+contextData.table.forEach(entry => {
+const badgeClass = entry.status === 'Verified' ? 'text-emerald-700 bg-emerald-50 border-emerald-100' : 'text-red-700 bg-red-50 border-red-100';
+tableGridBody.innerHTML += `
+<tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0">
+<td class="py-3 px-4 font-bold text-slate-900">${entry.name}</td>
+<td class="py-3 px-4 font-semibold text-blue-600">${entry.focus}</td>
+<td class="py-3 px-4 font-black text-slate-800">₹${(entry.funds * scaleFactor).toFixed(1)} Cr</td>
+<td class="py-3 px-4 text-center"><span class="px-2 py-1 font-bold text-[9px] uppercase rounded border ${badgeClass}">${entry.status}</span></td>
+<td class="py-3 px-4 text-center"><a href="${entry.link}" target="_blank" class="text-blue-500 font-bold hover:underline">Link</a></td>
+</tr>
+`;
+});
+
+let scaledLineData = contextData.lineReceived.map(val => (val * scaleFactor).toFixed(1));
+if (activeLineChart) activeLineChart.destroy();
+activeLineChart = new Chart(document.getElementById('wideLineChart').getContext('2d'), {
+type: 'line',
+data: { labels: contextData.lineLabels, datasets: [{ label: 'Funds (Cr)', data: scaledLineData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true }] },
+options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } }
+});
+
+if (activePieChart) activePieChart.destroy();
+activePieChart = new Chart(document.getElementById('doughnutSectorChart').getContext('2d'), {
+type: 'doughnut',
+data: { labels: contextData.pieLabels, datasets: [{ data: contextData.pieData, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'], borderWidth: 0 }] },
+options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 6, font: { size: 10 } } } } }
+});
+}
+
+window.addEventListener('DOMContentLoaded', () => { updateDashboard(); renderVolunteers(); });
+</script>
+</body>
+</html>
